@@ -1,0 +1,225 @@
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined'
+import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined'
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
+import LinkOutlinedIcon from '@mui/icons-material/LinkOutlined'
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined'
+import PersonOffOutlinedIcon from '@mui/icons-material/PersonOffOutlined'
+import WifiOutlinedIcon from '@mui/icons-material/WifiOutlined'
+import type {
+  ActivityLogRow,
+  AssignmentRow,
+  DashboardStat,
+  LoginActivityRow,
+} from '@/types'
+
+export const DASHBOARD_SUMMARY_STATS: DashboardStat[] = [
+  {
+    id: 'total-employees',
+    title: 'Total Employees',
+    value: 148,
+    subtitle: 'Registered in locker system',
+    icon: PeopleOutlinedIcon,
+    color: 'primary',
+  },
+  {
+    id: 'online-employees',
+    title: 'Online Employees',
+    value: 96,
+    subtitle: 'Currently logged in',
+    icon: WifiOutlinedIcon,
+    color: 'success',
+  },
+  {
+    id: 'offline-employees',
+    title: 'Offline Employees',
+    value: 52,
+    subtitle: 'Not currently active',
+    icon: PersonOffOutlinedIcon,
+    color: 'info',
+  },
+  {
+    id: 'total-devices',
+    title: 'Total Devices',
+    value: 210,
+    subtitle: 'Across all locker units',
+    icon: DevicesOutlinedIcon,
+    color: 'primary',
+  },
+  {
+    id: 'available-devices',
+    title: 'Available Devices',
+    value: 64,
+    subtitle: 'Ready for assignment',
+    icon: Inventory2OutlinedIcon,
+    color: 'secondary',
+  },
+  {
+    id: 'assigned-devices',
+    title: 'Assigned Devices',
+    value: 131,
+    subtitle: 'Checked out to employees',
+    icon: LinkOutlinedIcon,
+    color: 'success',
+  },
+  {
+    id: 'devices-under-repair',
+    title: 'Devices Under Repair',
+    value: 15,
+    subtitle: 'Temporarily unavailable',
+    icon: BuildOutlinedIcon,
+    color: 'warning',
+  },
+]
+
+export const RECENT_LOGIN_ACTIVITY: LoginActivityRow[] = [
+  {
+    id: '1',
+    employeeName: 'Alex Morgan',
+    email: 'alex.morgan@securedlocker.com',
+    department: 'Engineering',
+    floor: '3',
+    deskNumber: 'E-312',
+    assignedDevice: 'SDL-LAP-1042',
+    loginStatus: 'Online',
+    loginTime: '2026-07-29 09:12 AM',
+  },
+  {
+    id: '2',
+    employeeName: 'Jordan Lee',
+    email: 'jordan.lee@securedlocker.com',
+    department: 'Operations',
+    floor: '2',
+    deskNumber: 'O-208',
+    assignedDevice: 'SDL-TAB-2211',
+    loginStatus: 'Online',
+    loginTime: '2026-07-29 08:54 AM',
+  },
+  {
+    id: '3',
+    employeeName: 'Sam Rivera',
+    email: 'sam.rivera@securedlocker.com',
+    department: 'Support',
+    floor: '1',
+    deskNumber: 'S-114',
+    assignedDevice: 'SDL-LAP-0876',
+    loginStatus: 'Offline',
+    loginTime: '2026-07-28 05:41 PM',
+  },
+  {
+    id: '4',
+    employeeName: 'Taylor Chen',
+    email: 'taylor.chen@securedlocker.com',
+    department: 'Security',
+    floor: '4',
+    deskNumber: 'SEC-401',
+    assignedDevice: 'SDL-LAP-1503',
+    loginStatus: 'Online',
+    loginTime: '2026-07-29 09:03 AM',
+  },
+  {
+    id: '5',
+    employeeName: 'Morgan Blake',
+    email: 'morgan.blake@securedlocker.com',
+    department: 'Finance',
+    floor: '2',
+    deskNumber: 'F-220',
+    assignedDevice: 'SDL-LAP-0634',
+    loginStatus: 'Offline',
+    loginTime: '2026-07-28 06:18 PM',
+  },
+  {
+    id: '6',
+    employeeName: 'Casey Nguyen',
+    email: 'casey.nguyen@securedlocker.com',
+    department: 'Engineering',
+    floor: '3',
+    deskNumber: 'E-318',
+    assignedDevice: 'SDL-TAB-2098',
+    loginStatus: 'Online',
+    loginTime: '2026-07-29 08:37 AM',
+  },
+  {
+    id: '7',
+    employeeName: 'Riley Patel',
+    email: 'riley.patel@securedlocker.com',
+    department: 'HR',
+    floor: '1',
+    deskNumber: 'HR-105',
+    assignedDevice: 'SDL-LAP-0441',
+    loginStatus: 'Offline',
+    loginTime: '2026-07-28 04:52 PM',
+  },
+  {
+    id: '8',
+    employeeName: 'Jamie Ortiz',
+    email: 'jamie.ortiz@securedlocker.com',
+    department: 'Operations',
+    floor: '2',
+    deskNumber: 'O-215',
+    assignedDevice: 'SDL-LAP-1188',
+    loginStatus: 'Online',
+    loginTime: '2026-07-29 09:21 AM',
+  },
+]
+
+export const ASSIGNMENT_ROWS: AssignmentRow[] = [
+  {
+    id: 1,
+    employeeName: 'Alex Morgan',
+    deviceName: 'SDL-LAP-1042',
+    assignedAt: '2026-07-12',
+    status: 'Active',
+  },
+  {
+    id: 2,
+    employeeName: 'Jordan Lee',
+    deviceName: 'SDL-TAB-2211',
+    assignedAt: '2026-07-18',
+    status: 'Active',
+  },
+  {
+    id: 3,
+    employeeName: 'Sam Rivera',
+    deviceName: 'SDL-LAP-0876',
+    assignedAt: '2026-06-30',
+    status: 'Pending',
+  },
+  {
+    id: 4,
+    employeeName: 'Riley Patel',
+    deviceName: 'SDL-LAP-0441',
+    assignedAt: '2026-05-21',
+    status: 'Returned',
+  },
+]
+
+export const ACTIVITY_LOG_ROWS: ActivityLogRow[] = [
+  {
+    id: 1,
+    actor: 'Alex Morgan',
+    action: 'Device checked out',
+    resource: 'SDL-LAP-1042',
+    timestamp: '2026-07-29 09:12 AM',
+  },
+  {
+    id: 2,
+    actor: 'System',
+    action: 'Locker bay unlocked',
+    resource: 'Bay A-12',
+    timestamp: '2026-07-29 09:11 AM',
+  },
+  {
+    id: 3,
+    actor: 'Taylor Chen',
+    action: 'Assignment updated',
+    resource: 'SDL-LAP-1503',
+    timestamp: '2026-07-29 08:58 AM',
+  },
+  {
+    id: 4,
+    actor: 'Jordan Lee',
+    action: 'Device returned',
+    resource: 'SDL-TAB-1902',
+    timestamp: '2026-07-28 06:40 PM',
+  },
+]

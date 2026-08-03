@@ -1,0 +1,100 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Super Admin profile must live at users/{auth.uid} with role super_admin + active status.
+    function isSuperAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
+    // Own Auth UID doc, OR any existing employee doc whose email matches the signed-in user.
+    function canUpdateUserDoc(userId) {
+      return isSignedIn() && (
+        request.auth.uid == userId
+        || (
+          resource.data.email is string
+          && request.auth.token.email is string
+          && resource.data.email.lower() == request.auth.token.email.lower()
+        )
+      );
+    }
+
+    // Document id must match the uid field stored in the document body.
+    function uidMatchesDocId(userId) {
+      return request.resource.data.uid is string
+        && request.resource.data.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      // Mobile login/logout/presence updates, OR super admin user management.
+      allow update: if canUpdateUserDoc(userId) || isSuperAdmin();
+
+      // First-time write under own Auth UID, OR super admin creating users/{newUid}.
+      allow create: if isSignedIn() && uidMatchesDocId(userId) && (
+        request.auth.uid == userId
+        || isSuperAdmin()
+      );
+
+      // Soft-delete only — no hard deletes.
+      allow delete: if false;
+    }
+
+    match /devices/{deviceId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if false;
+    }
+
+    match /heartbeats/{heartbeatId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /sessions/{sessionId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /commands/{commandId} {
+      allow read, update: if isSignedIn();
+      allow create, delete: if false;
+    }
+
+    match /policies/{policyId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /device_logs/{logId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Admin dashboard — device assignment tracking.
+    match /assignments/{assignmentId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // Admin dashboard — audit trail (login/logout + admin actions).
+    match /activityLogs/{logId} {
+      allow create: if isSignedIn();
+      allow read: if isSuperAdmin();
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

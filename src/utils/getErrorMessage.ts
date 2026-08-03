@@ -1,0 +1,12 @@
+/** Resolve a readable message from unknown thrown values. */
+export function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  if (typeof error === 'string' && error.length > 0) {
+    return error
+  }
+
+  return fallback
+}
