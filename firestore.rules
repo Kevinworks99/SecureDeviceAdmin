@@ -50,7 +50,11 @@ service cloud.firestore {
     }
 
     match /devices/{deviceId} {
-      allow read, create, update: if isSignedIn();
+      // Inventory create is admin-only. Mobile must upsert/update existing docs
+      // (not addDoc) so login does not create duplicate device rows.
+      allow read: if isSignedIn();
+      allow create: if isSuperAdmin();
+      allow update: if isSignedIn();
       allow delete: if false;
     }
 

@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { firestoreService } from '@/services'
+import { deviceManagementService } from '@/services/deviceManagementService'
 import type { Device } from '@/models'
 import type { DeviceRow } from '@/types/device'
+import {
+  dedupeDevices,
+  partitionDuplicateDevices,
+} from '@/utils/dedupeDevices'
 import { timestampToMillis } from '@/utils/formatTimestamp'
 import { toDeviceStatusValue } from '@/utils/deviceStatus'
 
@@ -47,11 +52,12 @@ function buildDeviceRows(devices: Device[]): DeviceRow[] {
   }))
 }
 
-/** Real-time devices list for Device Management (excludes soft-deleted). */
+/** Real-time devices list for Device Management (excludes soft-deleted + duplicates). */
 export function useDeviceManagement(): UseDeviceManagementResult {
   const [devices, setDevices] = useState<Device[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const cleanedDuplicateIdsRef = useRef(new Set<string>())
 
   useEffect(() => {
     const unsubscribe = firestoreService.subscribeToDevices(
@@ -69,13 +75,48 @@ export function useDeviceManagement(): UseDeviceManagementResult {
     return unsubscribe
   }, [])
 
-  const visibleDevices = useMemo(
+  const activeDevices = useMemo(
     () =>
       devices.filter(
         (device) => toDeviceStatusValue(device.status) !== 'deleted',
       ),
     [devices],
   )
+
+  const visibleDevices = useMemo(
+    () => dedupeDevices(activeDevices),
+    [activeDevices],
+  )
+
+  // Soft-delete older duplicate docs once so they stay gone across the app.
+  useEffect(() => {
+    const { duplicates } = partitionDuplicateDevices(activeDevices)
+    const pending = duplicates.filter(
+      (device) => !cleanedDuplicateIdsRef.current.has(device.id),
+    )
+    if (pending.length === 0) {
+      return
+    }
+
+    for (const device of pending) {
+      cleanedDuplicateIdsRef.current.add(device.id)
+    }
+
+    void Promise.all(
+      pending.map(async (device) => {
+        try {
+          await deviceManagementService.softDeleteDevice(device.id)
+        } catch (cleanupError) {
+          cleanedDuplicateIdsRef.current.delete(device.id)
+          console.error(
+            '[devices] failed to soft-delete duplicate',
+            device.id,
+            cleanupError,
+          )
+        }
+      }),
+    )
+  }, [activeDevices])
 
   const rows = useMemo(
     () => buildDeviceRows(visibleDevices),
