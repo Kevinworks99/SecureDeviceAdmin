@@ -4,6 +4,7 @@ import type { Device } from '@/models'
 import type { DeviceRow } from '@/types/device'
 import { timestampToMillis } from '@/utils/formatTimestamp'
 import { toDeviceStatusValue } from '@/utils/deviceStatus'
+import { isRecoverableFirestoreListenError } from '@/utils/firestoreNetwork'
 
 interface UseDevicesResult {
   rows: DeviceRow[]
@@ -54,6 +55,12 @@ export function useDevices(): UseDevicesResult {
         setError(null)
       },
       (subscribeError) => {
+        if (isRecoverableFirestoreListenError(subscribeError)) {
+          setLoading(false)
+          setError(null)
+          return
+        }
+
         setLoading(false)
         setError(subscribeError.message || 'Failed to load devices.')
       },

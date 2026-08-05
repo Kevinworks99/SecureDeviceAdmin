@@ -13,10 +13,11 @@ export const auth: Auth = getAuth(firebaseApp)
 
 /**
  * Cloud Firestore instance.
- * Long-polling improves connectivity in restrictive networks / dev environments.
+ * Auto-detected long-polling keeps restrictive networks working without forcing
+ * every watch stream through long-polling in normal browsers.
  */
 export const db: Firestore = initializeFirestore(firebaseApp, {
-  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
 })
 
 if (import.meta.env.DEV) {

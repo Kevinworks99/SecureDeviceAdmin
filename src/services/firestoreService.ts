@@ -16,7 +16,11 @@ import {
   mapDeviceDocument,
   mapUserDocument,
 } from '@/utils/firestoreMappers'
-import { mapFirestoreError, withFirestoreRetry } from '@/utils/firestoreNetwork'
+import {
+  isRecoverableFirestoreListenError,
+  mapFirestoreError,
+  withFirestoreRetry,
+} from '@/utils/firestoreNetwork'
 
 /**
  * Firestore service for Secure Device Locker collections.
@@ -168,6 +172,11 @@ export class FirestoreService {
         )
       },
       (error) => {
+        if (isRecoverableFirestoreListenError(error)) {
+          onError?.(error)
+          return
+        }
+
         onError?.(
           new Error(mapFirestoreError(error, 'Devices subscription failed.')),
         )

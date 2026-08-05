@@ -3,6 +3,7 @@ import { firestoreService } from '@/services'
 import type { Device, User } from '@/models'
 import type { UserRow } from '@/types/userManagement'
 import { timestampToMillis } from '@/utils/formatTimestamp'
+import { isRecoverableFirestoreListenError } from '@/utils/firestoreNetwork'
 import {
   buildDeviceLookup,
   resolveAssignedDevice,
@@ -62,6 +63,10 @@ export function useUserManagement(): UseUserManagementResult {
         setDevices(nextDevices)
       },
       (subscribeError) => {
+        if (isRecoverableFirestoreListenError(subscribeError)) {
+          return
+        }
+
         console.error('[Firestore] devices subscription failed', subscribeError)
       },
     )

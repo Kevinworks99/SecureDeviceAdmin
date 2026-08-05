@@ -1,6 +1,5 @@
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined'
-import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined'
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
@@ -24,11 +23,6 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: 'Devices',
     path: PATHS.devices,
     icon: DevicesOutlinedIcon,
-  },
-  {
-    label: 'Assignments',
-    path: PATHS.assignments,
-    icon: AssignmentOutlinedIcon,
   },
   {
     label: 'Activity Logs',

@@ -9,6 +9,7 @@ import {
 } from '@/utils/dedupeDevices'
 import { timestampToMillis } from '@/utils/formatTimestamp'
 import { toDeviceStatusValue } from '@/utils/deviceStatus'
+import { isRecoverableFirestoreListenError } from '@/utils/firestoreNetwork'
 
 interface UseDeviceManagementResult {
   devices: Device[]
@@ -17,6 +18,9 @@ interface UseDeviceManagementResult {
   loading: boolean
   error: string | null
 }
+
+const LISTENER_RETRY_DELAY_MS = 1000
+const LISTENER_MAX_RETRIES = 3
 
 function purchaseDateSortValue(purchaseDate: string): number | null {
   if (!purchaseDate.trim()) {
@@ -60,19 +64,66 @@ export function useDeviceManagement(): UseDeviceManagementResult {
   const cleanedDuplicateIdsRef = useRef(new Set<string>())
 
   useEffect(() => {
-    const unsubscribe = firestoreService.subscribeToDevices(
-      (nextDevices) => {
-        setDevices(nextDevices)
-        setLoading(false)
-        setError(null)
-      },
-      (subscribeError) => {
-        setLoading(false)
-        setError(subscribeError.message || 'Failed to load devices.')
-      },
-    )
+    let disposed = false
+    let retryCount = 0
+    let retryTimer: number | null = null
+    let unsubscribe: (() => void) | null = null
 
-    return unsubscribe
+    const clearRetryTimer = () => {
+      if (retryTimer === null) {
+        return
+      }
+      window.clearTimeout(retryTimer)
+      retryTimer = null
+    }
+
+    const subscribe = () => {
+      clearRetryTimer()
+      unsubscribe?.()
+
+      unsubscribe = firestoreService.subscribeToDevices(
+        (nextDevices) => {
+          retryCount = 0
+          setDevices(nextDevices)
+          setLoading(false)
+          setError(null)
+        },
+        (subscribeError) => {
+          const isRecoverableListenError =
+            isRecoverableFirestoreListenError(subscribeError)
+
+          if (
+            !disposed &&
+            isRecoverableListenError &&
+            retryCount < LISTENER_MAX_RETRIES
+          ) {
+            retryCount += 1
+            setLoading(false)
+            setError(null)
+            retryTimer = window.setTimeout(
+              subscribe,
+              LISTENER_RETRY_DELAY_MS * retryCount,
+            )
+            return
+          }
+
+          setLoading(false)
+          setError(
+            isRecoverableListenError
+              ? 'Live device updates were interrupted. Refresh the page if devices stop updating.'
+              : subscribeError.message || 'Failed to load devices.',
+          )
+        },
+      )
+    }
+
+    subscribe()
+
+    return () => {
+      disposed = true
+      clearRetryTimer()
+      unsubscribe?.()
+    }
   }, [])
 
   const activeDevices = useMemo(

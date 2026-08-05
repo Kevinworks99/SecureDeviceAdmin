@@ -13,3 +13,8 @@ export {
   getActivityLogs,
 } from './activityLogService'
 export { createAuthUserAccount } from './adminAuthService'
+export {
+  SessionSettingsService,
+  sessionSettingsService,
+} from './sessionSettingsService'
+export type { SessionSettings } from './sessionSettingsService'

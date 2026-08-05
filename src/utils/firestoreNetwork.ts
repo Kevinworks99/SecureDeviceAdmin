@@ -17,6 +17,17 @@ function isOfflineError(error: unknown): boolean {
   )
 }
 
+/** Firestore can emit this transient listen-stream assertion while reconnecting. */
+export function isRecoverableFirestoreListenError(error: unknown): boolean {
+  const message = getErrorMessage(error, '').toLowerCase()
+  return (
+    message.includes('target id already exists') ||
+    (message.includes('internal assertion failed') &&
+      message.includes('unexpected state') &&
+      message.includes('targetid'))
+  )
+}
+
 /** Ensure Firestore network is enabled before server reads. */
 export async function ensureFirestoreOnline(
   firestore: Firestore = db,
@@ -38,6 +49,10 @@ export function mapFirestoreError(error: unknown, fallback: string): string {
 
   if (message.toLowerCase().includes('permission')) {
     return 'Missing or insufficient permissions. Check Firestore security rules.'
+  }
+
+  if (isRecoverableFirestoreListenError(error)) {
+    return fallback
   }
 
   return message || fallback

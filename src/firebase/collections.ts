@@ -7,6 +7,7 @@ export const FIRESTORE_COLLECTIONS = {
   devices: 'devices',
   assignments: 'assignments',
   activityLogs: 'activityLogs',
+  settings: 'settings',
 } as const
 
 export type FirestoreCollectionName =

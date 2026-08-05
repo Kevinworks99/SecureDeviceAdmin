@@ -58,7 +58,12 @@ export const dashboardPresenceColumns: GridColDef<DashboardPresenceRow>[] = [
     flex: 0.7,
     minWidth: 100,
     type: 'number',
-    valueFormatter: (value: number | null) => formatTimeOnly(value),
+    renderCell: (
+      params: GridRenderCellParams<DashboardPresenceRow, number | null>,
+    ) =>
+      params.row.status === 'active'
+        ? '-'
+        : formatTimeOnly(params.row.lastLogoutAt, '-'),
   },
   {
     field: 'status',

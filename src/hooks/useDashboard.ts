@@ -11,6 +11,7 @@ import type {
 } from '@/types/dashboard'
 import { timestampToMillis } from '@/utils/formatTimestamp'
 import { toDeviceStatusValue } from '@/utils/deviceStatus'
+import { isRecoverableFirestoreListenError } from '@/utils/firestoreNetwork'
 
 interface UseDashboardResult {
   presenceUsers: DashboardPresenceRow[]
@@ -117,6 +118,10 @@ function toDashboardSubscribeError(
   collectionLabel: string,
   subscribeError: Error,
 ): string {
+  if (isRecoverableFirestoreListenError(subscribeError)) {
+    return ''
+  }
+
   if (subscribeError.message.toLowerCase().includes('permission')) {
     return `Unable to load ${collectionLabel}. Firestore rules for this collection may be missing or denying signed-in reads.`
   }
@@ -160,6 +165,11 @@ export function useDashboard(): UseDashboardResult {
         setError(null)
       },
       (subscribeError) => {
+        if (isRecoverableFirestoreListenError(subscribeError)) {
+          setUsersReady(true)
+          return
+        }
+
         setUsersReady(true)
         setError(toDashboardSubscribeError('users', subscribeError))
       },
@@ -171,6 +181,11 @@ export function useDashboard(): UseDashboardResult {
         setDevicesReady(true)
       },
       (subscribeError) => {
+        if (isRecoverableFirestoreListenError(subscribeError)) {
+          setDevicesReady(true)
+          return
+        }
+
         setDevicesReady(true)
         setError((prev) =>
           prev ?? toDashboardSubscribeError('devices', subscribeError),
@@ -184,6 +199,11 @@ export function useDashboard(): UseDashboardResult {
         setAssignmentsReady(true)
       },
       (subscribeError) => {
+        if (isRecoverableFirestoreListenError(subscribeError)) {
+          setAssignmentsReady(true)
+          return
+        }
+
         setAssignmentsReady(true)
         setError((prev) =>
           prev ?? toDashboardSubscribeError('assignments', subscribeError),
